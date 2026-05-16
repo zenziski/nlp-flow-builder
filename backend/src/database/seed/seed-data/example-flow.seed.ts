@@ -1,0 +1,77 @@
+export const exampleFlow = {
+  name: 'Main Support Flow',
+  description: 'Example customer support flow',
+  startNodeId: 'start-1',
+  version: 1,
+  published: false,
+  nodes: [
+    {
+      id: 'start-1',
+      type: 'startNode',
+      position: { x: 250, y: 50 },
+      data: { label: 'Start' },
+    },
+    {
+      id: 'welcome-1',
+      type: 'messageNode',
+      position: { x: 250, y: 160 },
+      data: {
+        label: 'Welcome Message',
+        messages: ['Olá! Bem-vindo ao suporte. Como posso te ajudar?'],
+      },
+    },
+    {
+      id: 'intent-1',
+      type: 'intentNode',
+      position: { x: 250, y: 290 },
+      data: {
+        label: 'Detect Intent',
+        language: 'pt',
+        confidenceThreshold: 0.6,
+        intents: ['greeting', 'order_status', 'cancel_order', 'farewell'],
+      },
+    },
+    {
+      id: 'greeting-reply',
+      type: 'messageNode',
+      position: { x: 50, y: 430 },
+      data: { label: 'Greeting Reply', messages: ['Olá! Como posso ajudar você hoje?'] },
+    },
+    {
+      id: 'order-reply',
+      type: 'messageNode',
+      position: { x: 250, y: 430 },
+      data: { label: 'Order Status', messages: ['Por favor, informe o número do seu pedido:'] },
+    },
+    {
+      id: 'cancel-reply',
+      type: 'messageNode',
+      position: { x: 450, y: 430 },
+      data: { label: 'Cancel Order', messages: ['Vou processar o cancelamento. Confirme o número do pedido:'] },
+    },
+    {
+      id: 'fallback-1',
+      type: 'messageNode',
+      position: { x: 650, y: 430 },
+      data: { label: 'Fallback', messages: ['Desculpe, não entendi. Pode reformular sua pergunta?'] },
+    },
+    {
+      id: 'end-1',
+      type: 'endNode',
+      position: { x: 250, y: 580 },
+      data: { label: 'End', message: 'Obrigado pelo contato! Até logo!' },
+    },
+  ],
+  edges: [
+    { id: 'e1', source: 'start-1', target: 'welcome-1' },
+    { id: 'e2', source: 'welcome-1', target: 'intent-1' },
+    { id: 'e3', source: 'intent-1', target: 'greeting-reply', sourceHandle: 'greeting' },
+    { id: 'e4', source: 'intent-1', target: 'order-reply', sourceHandle: 'order_status' },
+    { id: 'e5', source: 'intent-1', target: 'cancel-reply', sourceHandle: 'cancel_order' },
+    { id: 'e6', source: 'intent-1', target: 'fallback-1', sourceHandle: 'fallback' },
+    { id: 'e7', source: 'greeting-reply', target: 'end-1' },
+    { id: 'e8', source: 'order-reply', target: 'end-1' },
+    { id: 'e9', source: 'cancel-reply', target: 'end-1' },
+    { id: 'e10', source: 'fallback-1', target: 'end-1' },
+  ],
+};

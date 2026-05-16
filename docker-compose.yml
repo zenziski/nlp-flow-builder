@@ -1,0 +1,57 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: nlp-flow-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: nlp-flow-builder
+    networks:
+      - nlp-flow-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nlp-flow-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017
+      MONGODB_DB: nlp-flow-builder
+      JWT_SECRET: change-this-secret-in-production-please
+      JWT_EXPIRES_IN: 7d
+      PORT: 3000
+      CORS_ORIGIN: http://localhost:5173
+      SEED_ON_STARTUP: "true"
+    depends_on:
+      - mongodb
+    networks:
+      - nlp-flow-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nlp-flow-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - nlp-flow-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  nlp-flow-network:
+    driver: bridge
+
+# Dev profile: run with --profile dev to also start mongo-express
+# docker-compose --profile dev up

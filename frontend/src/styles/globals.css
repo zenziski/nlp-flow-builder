@@ -1,0 +1,227 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #fff7f2;
+  --surface: #ffffff;
+  --surface-2: #fff0e4;
+  --text: #2a2127;
+  --muted: #75636f;
+  --line: #ebd6cc;
+  --brand: #ef6c3e;
+  --brand-strong: #d35a2f;
+  --accent: #0f766e;
+}
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply antialiased;
+    margin: 0;
+    min-height: 100vh;
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    background-color: #ffffff;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: 'Sora', sans-serif;
+    letter-spacing: -0.015em;
+  }
+
+  #root {
+    min-height: 100vh;
+    background-color: #ffffff;
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply min-h-screen;
+    position: relative;
+  }
+
+  .app-shell::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 1;
+    background-color: transparent;
+    z-index: 0;
+  }
+
+  .surface-panel {
+    @apply rounded-[1.35rem] border backdrop-blur-sm;
+    border-color: var(--line);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 30px 60px -48px rgba(89, 45, 22, 0.85);
+  }
+
+  .surface-card {
+    @apply rounded-[1.35rem] border;
+    border-color: var(--line);
+    background: rgba(255, 248, 242, 0.96);
+    box-shadow: 0 22px 44px -32px rgba(101, 60, 32, 0.75);
+  }
+
+  .page-title {
+    @apply text-3xl md:text-4xl;
+    color: var(--text);
+  }
+
+  .page-subtitle {
+    @apply text-sm md:text-base;
+    color: var(--muted);
+  }
+
+  .flow-editor-shell {
+    background-color: #ffefe5;
+  }
+
+  .flow-editor-pane {
+    background-color: #fff8f2;
+    border-color: #dfc4b5;
+  }
+
+  .flow-editor-divider {
+    background-color: #e8d1c2;
+  }
+
+  .flow-editor-muted {
+    color: #6f5346;
+  }
+
+  .flow-editor-title {
+    color: #2b1f25;
+  }
+
+  .flow-editor-surface {
+    background-color: #ffffff;
+    border-color: #dfc4b5;
+  }
+
+  .flow-editor-properties input,
+  .flow-editor-properties select,
+  .flow-editor-properties textarea,
+  .flow-editor-simulator input,
+  .flow-editor-simulator select,
+  .flow-editor-simulator textarea {
+    background-color: #ffffff !important;
+    border-color: #d7b9a9 !important;
+    color: #2b1f25 !important;
+    border-radius: 10px !important;
+  }
+
+  .flow-editor-properties input::placeholder,
+  .flow-editor-properties textarea::placeholder,
+  .flow-editor-simulator input::placeholder,
+  .flow-editor-simulator textarea::placeholder {
+    color: #816354 !important;
+  }
+
+  .flow-editor-properties input:focus,
+  .flow-editor-properties select:focus,
+  .flow-editor-properties textarea:focus,
+  .flow-editor-simulator input:focus,
+  .flow-editor-simulator select:focus,
+  .flow-editor-simulator textarea:focus {
+    outline: none !important;
+    border-color: #d35a2f !important;
+    box-shadow: 0 0 0 2px rgba(211, 90, 47, 0.26) !important;
+  }
+
+  .flow-editor-properties .text-slate-300,
+  .flow-editor-simulator .text-slate-300,
+  .react-flow .text-slate-300 {
+    color: #4c3637 !important;
+  }
+
+  .flow-editor-properties .text-slate-400,
+  .flow-editor-simulator .text-slate-400,
+  .react-flow .text-slate-400 {
+    color: #5d4340 !important;
+  }
+
+  .flow-editor-properties .text-slate-500,
+  .flow-editor-simulator .text-slate-500,
+  .react-flow .text-slate-500 {
+    color: #765a4d !important;
+  }
+
+  .flow-editor-properties .text-slate-600,
+  .flow-editor-simulator .text-slate-600,
+  .react-flow .text-slate-600 {
+    color: #7f6255 !important;
+  }
+
+  .flow-editor-properties [class*="bg-slate-800"],
+  .flow-editor-simulator [class*="bg-slate-800"],
+  .react-flow [class*="bg-slate-800"],
+  .react-flow [class*="bg-slate-700/50"] {
+    background-color: #fff4ea !important;
+  }
+
+  .flow-editor-properties [class*="border-slate-700"],
+  .flow-editor-properties [class*="border-slate-600"],
+  .flow-editor-simulator [class*="border-slate-700"],
+  .flow-editor-simulator [class*="border-slate-600"],
+  .react-flow [class*="border-slate-700"],
+  .react-flow [class*="border-slate-600"] {
+    border-color: #d7b9a9 !important;
+  }
+}
+
+/* React Flow overrides for the app theme */
+.react-flow__background {
+  background-color: #fff2e8 !important;
+}
+
+.react-flow__controls {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 12px;
+}
+
+.react-flow__controls-button {
+  color: var(--brand-strong) !important;
+  border-color: var(--line) !important;
+  background-color: transparent !important;
+}
+
+.react-flow__minimap {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 12px;
+}
+
+.react-flow__edge-path {
+  stroke: #b78775;
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--brand);
+}
+
+.node-active {
+  animation: node-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes node-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 108, 62, 0.34); }
+  50% { box-shadow: 0 0 0 10px rgba(239, 108, 62, 0); }
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #ffe6d8; }
+::-webkit-scrollbar-thumb { background: #d8a78f; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #c18669; }
