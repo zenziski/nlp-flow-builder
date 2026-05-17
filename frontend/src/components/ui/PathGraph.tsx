@@ -44,7 +44,6 @@ const NODE_H = 70;
 const COL_GAP = 96;
 const ROW_GAP = 18;
 const PAD = 24;
-const ARROW_ID = 'path-arrow';
 
 // ── Layout algorithm (simplified Sugiyama) ─────────────────────────────────────
 function computeLayout(nodes: PathNode[], edges: PathEdge[]) {
@@ -177,7 +176,6 @@ function EdgePath({
       strokeWidth={strokeWidth}
       strokeOpacity={opacity}
       fill="none"
-      markerEnd={`url(#${ARROW_ID})`}
     />
   );
 }
@@ -299,18 +297,6 @@ export default function PathGraph({ nodes, edges, totalSessions }: Props) {
             height={svgHeight}
             style={{ overflow: 'visible' }}
           >
-            <defs>
-              <marker
-                id={ARROW_ID}
-                markerWidth="7"
-                markerHeight="7"
-                refX="6"
-                refY="3.5"
-                orient="auto"
-              >
-                <path d="M0,0 L0,7 L7,3.5 z" fill="var(--brand)" opacity={0.55} />
-              </marker>
-            </defs>
 
             {edges.map((e) => (
               <EdgePath
