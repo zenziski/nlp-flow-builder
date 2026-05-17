@@ -166,7 +166,7 @@ export default function BotConfigPage() {
     }
   };
 
-  const runtimeBase = bot.runtimeBaseUrl ?? RUNTIME_BASE;
+  const runtimeBase = bot?.runtimeBaseUrl ?? RUNTIME_BASE;
   const runtimeUrl = `${runtimeBase}/api/conversation/start`;
   const messageUrl = `${runtimeBase}/api/conversation/<sessionId>/message`;
   const messagePayload = JSON.stringify({ text: 'Hello!' }, null, 2);
