@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BarChart2, MessageSquare, Users, Zap, Bot } from 'lucide-react';
 import { botsService } from '../services/bots.service';
+import BotDetailUsage, { BotSelector } from '../components/ui/BotDetailUsage';
 
 type Overview = {
   totalSessions: number;
@@ -33,6 +34,7 @@ function StatCard({
 export default function UsagePage() {
   const [data, setData] = useState<Overview | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedBotId, setSelectedBotId] = useState<string | null>(null);
 
   useEffect(() => {
     botsService
@@ -49,7 +51,7 @@ export default function UsagePage() {
     <div className="py-6 md:py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="page-title">Usage</h1>
+        <h1 className="page-title">Analytics</h1>
         <p className="page-subtitle mt-1">Real conversations across all bots — simulator sessions excluded</p>
       </div>
 
@@ -179,6 +181,24 @@ export default function UsagePage() {
           )}
         </div>
       </div>
+
+      {/* Bot deep-dive */}
+      {data && data.bots.length > 0 && (
+        <div className="mt-2">
+          <BotSelector
+            bots={data.bots}
+            selectedId={selectedBotId}
+            onSelect={setSelectedBotId}
+          />
+          {selectedBotId && (
+            <BotDetailUsage
+              key={selectedBotId}
+              botId={selectedBotId}
+              botName={data.bots.find((b) => b._id === selectedBotId)?.name ?? ''}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

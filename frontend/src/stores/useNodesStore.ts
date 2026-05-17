@@ -20,6 +20,7 @@ interface NodesStore {
   onConnect: (connection: Connection) => void;
   addNode: (node: FlowNode) => void;
   updateNodeData: (nodeId: string, data: Partial<FlowNode['data']>) => void;
+  renameNode: (oldId: string, newId: string) => void;
   selectNode: (nodeId: string | null) => void;
   undo: () => void;
   redo: () => void;
@@ -70,6 +71,22 @@ export const useNodesStore = create<NodesStore>((set, get) => ({
     }));
     // Lazily mark the flow dirty so auto-save picks up node data edits.
     // Dynamic import breaks the circular-dependency cycle at module-init time.
+    import('./useFlowStore').then(({ useFlowStore }) => {
+      useFlowStore.getState().markDirty();
+    });
+  },
+
+  renameNode: (oldId, newId) => {
+    get().pushToUndo();
+    set((state) => ({
+      nodes: state.nodes.map((n) => (n.id === oldId ? { ...n, id: newId } : n)),
+      edges: state.edges.map((e) => ({
+        ...e,
+        source: e.source === oldId ? newId : e.source,
+        target: e.target === oldId ? newId : e.target,
+      })),
+      selectedNodeId: state.selectedNodeId === oldId ? newId : state.selectedNodeId,
+    }));
     import('./useFlowStore').then(({ useFlowStore }) => {
       useFlowStore.getState().markDirty();
     });

@@ -68,16 +68,9 @@ function buildRoundedPath(pts: Pt[], r = 12): string {
   return out.join(' ');
 }
 
-const MAX_SEGS = 7; // cap = 3 bridge columns (7-segment path)
-
 function computeHandles(sx: number, sy: number, tx: number, ty: number, segs: number[]): HandleInfo[] {
   const h: HandleInfo[] = [];
   let curX = sx;
-
-  // Source-anchored V segment extend handle
-  if (Math.abs(segs[0] - sy) > 20 && segs.length < MAX_SEGS) {
-    h.push({ id: 'ext-S', x: sx, y: (sy + segs[0]) / 2, dir: 'ew', action: -1 });
-  }
 
   for (let i = 0; i < segs.length; i++) {
     if (i % 2 === 0) {
@@ -89,11 +82,6 @@ function computeHandles(sx: number, sy: number, tx: number, ty: number, segs: nu
       h.push({ id: `vb-${i}`, x: segs[i], y: (segs[i - 1] + segs[i + 1]) / 2, dir: 'ew', action: i });
       curX = segs[i];
     }
-  }
-
-  // Target-anchored V segment extend handle
-  if (Math.abs(ty - segs[segs.length - 1]) > 20 && segs.length < MAX_SEGS) {
-    h.push({ id: 'ext-T', x: tx, y: (segs[segs.length - 1] + ty) / 2, dir: 'ew', action: -2 });
   }
 
   return h;
@@ -152,17 +140,8 @@ function DeletableEdge({
 
         let newSegs: number[];
 
-        if (handle.action >= 0) {
-          // Move an existing segment
-          newSegs = [...initSegs];
-          newSegs[handle.action] = initSegs[handle.action] + (handle.dir === 'ns' ? dy : dx);
-        } else if (handle.action === -1) {
-          // Extend source side: insert [newY, newBx, ...initSegs]
-          newSegs = [(sy + initSegs[0]) / 2 + dy, sx + dx, ...initSegs];
-        } else {
-          // Extend target side: insert [...initSegs, newY, newBx]
-          newSegs = [...initSegs, (initSegs[initSegs.length - 1] + ty) / 2 + dy, tx + dx];
-        }
+        newSegs = [...initSegs];
+        newSegs[handle.action] = initSegs[handle.action] + (handle.dir === 'ns' ? dy : dx);
 
         setEdges((eds) =>
           eds.map((edge) =>
@@ -178,7 +157,7 @@ function DeletableEdge({
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
     },
-    [id, segs, sx, sy, tx, ty, getViewport, setEdges],
+    [id, segs, getViewport, setEdges],
   );
 
   return (

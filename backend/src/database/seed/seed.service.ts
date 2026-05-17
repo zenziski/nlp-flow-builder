@@ -7,7 +7,13 @@ import { User, UserDocument } from '../../modules/auth/schemas/user.schema';
 import { Bot, BotDocument } from '../../modules/bots/schemas/bot.schema';
 import { Flow, FlowDocument } from '../../modules/flows/schemas/flow.schema';
 import { Intent, IntentDocument } from '../../modules/nlp/schemas/intent.schema';
+import {
+  ConversationSession,
+  ConversationSessionDocument,
+} from '../../modules/runtime/schemas/conversation-session.schema';
 import { exampleFlow } from './seed-data/example-flow.seed';
+import { analyticsBotFlow, analyticsIntents } from './seed-data/analytics-bot-flow.seed';
+import { generateAnalyticsSessions } from './seed-data/analytics-sessions.seed';
 
 @Injectable()
 export class SeedService implements OnApplicationBootstrap {
@@ -18,6 +24,8 @@ export class SeedService implements OnApplicationBootstrap {
     @InjectModel(Bot.name) private botModel: Model<BotDocument>,
     @InjectModel(Flow.name) private flowModel: Model<FlowDocument>,
     @InjectModel(Intent.name) private intentModel: Model<IntentDocument>,
+    @InjectModel(ConversationSession.name)
+    private sessionModel: Model<ConversationSessionDocument>,
     private config: ConfigService,
   ) {}
 
@@ -94,6 +102,37 @@ export class SeedService implements OnApplicationBootstrap {
       isDefault: true,
     });
 
-    return { user, bot };
+    // ── Analytics bot ──────────────────────────────────────────────────────
+    const analyticsBot = await this.botModel.create({
+      name: 'E-commerce Assistant',
+      description: 'Full e-commerce support bot with analytics data for testing',
+      language: 'pt',
+      createdBy: user._id,
+      settings: {
+        confidenceThreshold: 0.55,
+        fallbackMessage: 'Desculpe, não entendi. Pode reformular?',
+        welcomeMessage: 'Olá! Bem-vindo à nossa loja online. Como posso te ajudar?',
+      },
+    });
+
+    await this.intentModel.insertMany(
+      analyticsIntents.map((intent) => ({ ...intent, botId: analyticsBot._id })),
+    );
+
+    const analyticsFlow = await this.flowModel.create({
+      ...analyticsBotFlow,
+      botId: analyticsBot._id,
+      isDefault: true,
+    });
+
+    const sessions = generateAnalyticsSessions(
+      analyticsBot._id as any,
+      analyticsFlow._id as any,
+    );
+    await this.sessionModel.insertMany(sessions);
+
+    this.logger.log(`Inserted ${sessions.length} analytics sessions`);
+
+    return { user, bot, analyticsBot };
   }
 }

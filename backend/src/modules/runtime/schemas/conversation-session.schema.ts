@@ -10,6 +10,12 @@ export interface ConversationTurn {
   nodeId?: string;
 }
 
+export interface TriggeredIntent {
+  intent: string;
+  score: number;
+  timestamp: Date;
+}
+
 @Schema({ timestamps: true })
 export class ConversationSession {
   @Prop({ type: Types.ObjectId, ref: 'Bot', required: true, index: true })
@@ -32,6 +38,9 @@ export class ConversationSession {
 
   @Prop({ type: Array, default: [] })
   history: ConversationTurn[];
+
+  @Prop({ type: Array, default: [] })
+  triggeredIntents: TriggeredIntent[];
 
   @Prop({ enum: ['active', 'completed', 'expired', 'error'], default: 'active' })
   status: string;

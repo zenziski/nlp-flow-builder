@@ -55,7 +55,9 @@ function BaseNode({
             <div className={`w-6 h-6 rounded-md ${color} flex items-center justify-center flex-shrink-0`}>
               {icon}
             </div>
-            <span className="text-xs font-semibold text-[#32272c]">{title}</span>
+            <span className="text-xs font-semibold text-[#32272c]">
+              {(data?.label as string) || title}
+            </span>
           </div>
           {selected && (
             <button

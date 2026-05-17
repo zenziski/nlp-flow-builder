@@ -10,6 +10,7 @@ import SettingsPage from './pages/SettingsPage';
 import NlpPage from './pages/NlpPage';
 import BotConfigPage from './pages/BotConfigPage';
 import UsagePage from './pages/UsagePage';
+import ConversationsPage from './pages/ConversationsPage';
 import AppLayout from './components/layout/AppLayout';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -39,7 +40,8 @@ export default function App() {
           <Route path="bots" element={<BotsPage />} />
           <Route path="bots/:botId/nlp" element={<NlpPage />} />
           <Route path="bots/:botId/config" element={<BotConfigPage />} />
-          <Route path="usage" element={<UsagePage />} />
+          <Route path="analytics" element={<UsagePage />} />
+          <Route path="conversations" element={<ConversationsPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route

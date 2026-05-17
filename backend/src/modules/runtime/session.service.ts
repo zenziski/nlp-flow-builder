@@ -93,6 +93,16 @@ export class SessionService {
     const push: Record<string, unknown> = {};
     if (patch.turn) push['history'] = patch.turn;
 
+    // Track NLP intent hits for analytics
+    const nlpResult = (patch.context as any)?.nlpResult;
+    if (nlpResult?.intent && nlpResult.intent !== 'None') {
+      push['triggeredIntents'] = {
+        intent: nlpResult.intent,
+        score: nlpResult.score ?? 0,
+        timestamp: new Date(),
+      };
+    }
+
     const ops: Record<string, unknown> = { $set: update };
     if (Object.keys(push).length) ops['$push'] = push;
 

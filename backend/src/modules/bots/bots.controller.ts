@@ -85,4 +85,32 @@ export class BotsController {
   getUsage(@Param('id') id: string, @CurrentUser() user: any) {
     return this.botsService.getUsage(id, user._id.toString());
   }
+
+  @Get(':id/usage/detailed')
+  @ApiOperation({ summary: 'Get detailed analytics for a specific bot' })
+  getDetailedUsage(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.botsService.getDetailedUsage(id, user._id.toString());
+  }
+
+  @Get(':id/usage/path-analysis')
+  @ApiOperation({ summary: 'Get user path / flow traversal analysis for a bot' })
+  getPathAnalysis(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.botsService.getPathAnalysis(id, user._id.toString());
+  }
+
+  @Get(':id/sessions')
+  @ApiOperation({ summary: 'List real conversation sessions for a bot' })
+  getSessions(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.botsService.getSessions(id, user._id.toString());
+  }
+
+  @Get(':id/sessions/:sessionId')
+  @ApiOperation({ summary: 'Get full conversation history for a session' })
+  getSession(
+    @Param('id') id: string,
+    @Param('sessionId') sessionId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.botsService.getSession(id, sessionId, user._id.toString());
+  }
 }

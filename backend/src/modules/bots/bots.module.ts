@@ -7,12 +7,14 @@ import {
   ConversationSession,
   ConversationSessionSchema,
 } from '../runtime/schemas/conversation-session.schema';
+import { Flow, FlowSchema } from '../flows/schemas/flow.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Bot.name, schema: BotSchema },
       { name: ConversationSession.name, schema: ConversationSessionSchema },
+      { name: Flow.name, schema: FlowSchema },
     ]),
   ],
   controllers: [BotsController],

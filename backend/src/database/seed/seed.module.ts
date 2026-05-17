@@ -5,6 +5,10 @@ import { User, UserSchema } from '../../modules/auth/schemas/user.schema';
 import { Bot, BotSchema } from '../../modules/bots/schemas/bot.schema';
 import { Flow, FlowSchema } from '../../modules/flows/schemas/flow.schema';
 import { Intent, IntentSchema } from '../../modules/nlp/schemas/intent.schema';
+import {
+  ConversationSession,
+  ConversationSessionSchema,
+} from '../../modules/runtime/schemas/conversation-session.schema';
 
 @Module({
   imports: [
@@ -13,6 +17,7 @@ import { Intent, IntentSchema } from '../../modules/nlp/schemas/intent.schema';
       { name: Bot.name, schema: BotSchema },
       { name: Flow.name, schema: FlowSchema },
       { name: Intent.name, schema: IntentSchema },
+      { name: ConversationSession.name, schema: ConversationSessionSchema },
     ]),
   ],
   providers: [SeedService],

@@ -1,11 +1,12 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { Bot, LayoutDashboard, Settings, LogOut, BarChart2 } from 'lucide-react';
+import { Bot, LayoutDashboard, Settings, LogOut, BarChart2, MessagesSquare } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/bots', icon: Bot, label: 'Bots' },
-  { to: '/usage', icon: BarChart2, label: 'Usage' },
+  { to: '/analytics', icon: BarChart2, label: 'Analytics' },
+  { to: '/conversations', icon: MessagesSquare, label: 'Conversations' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -14,8 +15,8 @@ export default function AppLayout() {
   const user = useAuthStore((s) => s.user);
 
   return (
-    <div className="app-shell flex min-h-screen gap-3 bg-white p-3 text-slate-900 md:gap-5 md:p-5">
-      <aside className="surface-panel z-10 flex w-20 flex-col md:w-64">
+    <div className="app-shell flex min-h-screen bg-white p-3 text-slate-900 md:p-5">
+      <aside className="surface-panel z-10 flex w-20 flex-shrink-0 flex-col md:w-64 sticky top-3 md:top-5 self-start h-[calc(100vh-1.5rem)] md:h-[calc(100vh-2.5rem)]">
         <div className="border-b border-[#efd6ca] p-4 md:p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[var(--brand)] shadow-[0_16px_30px_-18px_rgba(211,90,47,0.95)]">
@@ -59,7 +60,7 @@ export default function AppLayout() {
         </div>
       </aside>
 
-      <main className="relative z-10 flex-1 overflow-auto rounded-2xl border border-[#ead5c8] bg-white">
+      <main className="relative z-10 ml-3 flex-1 overflow-auto rounded-2xl border border-[#ead5c8] bg-white md:ml-5">
         <div className="mx-auto min-h-full max-w-7xl p-2 md:p-4">
           <Outlet />
         </div>
