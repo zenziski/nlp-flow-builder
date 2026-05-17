@@ -37,6 +37,18 @@ export class Bot {
     }),
   })
   settings: BotSettings;
+
+  /** Public identifier used in Runtime API calls */
+  @Prop({ type: String, index: true, sparse: true })
+  clientId?: string;
+
+  /** Secret used to authenticate Runtime API calls (stored as-is; treat as sensitive) */
+  @Prop({ type: String })
+  clientSecret?: string;
+
+  /** Default flow used by the Runtime API when no flowId is provided */
+  @Prop({ type: Types.ObjectId, ref: 'Flow' })
+  mainFlowId?: Types.ObjectId;
 }
 
 export const BotSchema = SchemaFactory.createForClass(Bot);

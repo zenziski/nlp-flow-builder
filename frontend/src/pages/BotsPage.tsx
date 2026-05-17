@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Plus, Bot, Trash2, ExternalLink, Cpu } from 'lucide-react';
+import { Plus, Bot, Trash2, ExternalLink, Cpu, Settings2 } from 'lucide-react';
 import { useBotStore } from '../stores/useBotStore';
 import { useFlowStore } from '../stores/useFlowStore';
 import Button from '../components/ui/Button';
@@ -12,7 +12,7 @@ import type { Bot as BotType } from '../types/bot.types';
 export default function BotsPage() {
   const navigate = useNavigate();
   const { bots, fetchBots, createBot, deleteBot, isLoading } = useBotStore();
-  const { flows, fetchFlows, createFlow } = useFlowStore();
+  const { flows, fetchFlows, createFlow, isLoading: flowsLoading } = useFlowStore();
   const [showCreateBot, setShowCreateBot] = useState(false);
   const [showCreateFlow, setShowCreateFlow] = useState(false);
   const [selectedBot, setSelectedBot] = useState<BotType | null>(null);
@@ -140,6 +140,13 @@ export default function BotsPage() {
                 <Button size="sm" variant="secondary" onClick={() => navigate(`/bots/${bot._id}/nlp`)} className="flex-1">
                   <Cpu className="w-3 h-3" /> NLP
                 </Button>
+                <button
+                  onClick={() => navigate(`/bots/${bot._id}/config`)}
+                  title="Configure bot"
+                  className="flex items-center justify-center rounded-xl border border-[#e4cfc4] p-2 text-[#9e7f6f] transition-colors hover:border-[var(--brand)] hover:bg-[#fff0e4] hover:text-[var(--brand)]"
+                >
+                  <Settings2 className="h-3.5 w-3.5" />
+                </button>
               </div>
             </div>
           ))}
@@ -154,14 +161,35 @@ export default function BotsPage() {
               <Plus className="w-3 h-3" /> New Flow
             </Button>
           </div>
-          {flows.length === 0 ? (
+          {flowsLoading ? (
+            <div className="space-y-2.5">
+              {[1, 2].map((i) => (
+                <div key={i} className="surface-panel flex items-center justify-between p-3.5 animate-pulse">
+                  <div className="space-y-1.5">
+                    <div className="h-3.5 w-36 rounded bg-[#f0ddd4]" />
+                    <div className="h-2.5 w-24 rounded bg-[#f7ece6]" />
+                  </div>
+                  <div className="h-7 w-24 rounded-xl bg-[#f0ddd4]" />
+                </div>
+              ))}
+            </div>
+          ) : flows.length === 0 ? (
             <p className="surface-panel p-4 text-sm text-slate-600">No flows yet. Create one!</p>
           ) : (
             <div className="space-y-2.5">
-              {flows.map((flow) => (
+              {[...flows].sort((a, b) =>
+                a._id === selectedBot?.mainFlowId ? -1 : b._id === selectedBot?.mainFlowId ? 1 : 0
+              ).map((flow) => (
                 <div key={flow._id} className="surface-panel flex items-center justify-between p-3.5">
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">{flow.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-slate-900">{flow.name}</p>
+                      {selectedBot?.mainFlowId === flow._id && (
+                        <span className="rounded-md bg-[#dff4eb] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#0f766e]">
+                          Main
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-[#7e695d]">v{flow.version} · {flow.published ? 'Published' : 'Draft'}</p>
                   </div>
                   <Button size="sm" onClick={() => openBuilder(selectedBot._id, flow._id)}>

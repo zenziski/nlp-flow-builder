@@ -6,12 +6,17 @@ import {
   Delete,
   Body,
   Param,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+} from '@nestjs/common';import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { IsString, IsOptional } from 'class-validator';
 import { BotsService } from './bots.service';
 import { CreateBotDto } from './dto/create-bot.dto';
 import { UpdateBotDto } from './dto/update-bot.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+
+class SetMainFlowDto {
+  @IsString() @IsOptional()
+  flowId?: string | null;
+}
 
 @ApiTags('Bots')
 @ApiBearerAuth()
@@ -23,6 +28,12 @@ export class BotsController {
   @ApiOperation({ summary: 'List all bots for current user' })
   findAll(@CurrentUser() user: any) {
     return this.botsService.findAll(user._id.toString());
+  }
+
+  @Get('usage-overview')
+  @ApiOperation({ summary: 'Get aggregated usage across all bots for current user' })
+  getUsageOverview(@CurrentUser() user: any) {
+    return this.botsService.getUsageOverview(user._id.toString());
   }
 
   @Get(':id')
@@ -51,5 +62,27 @@ export class BotsController {
   @ApiOperation({ summary: 'Delete a bot' })
   remove(@Param('id') id: string, @CurrentUser() user: any) {
     return this.botsService.remove(id, user._id.toString());
+  }
+
+  @Post(':id/regenerate-secret')
+  @ApiOperation({ summary: 'Regenerate the Runtime API client secret for a bot' })
+  regenerateSecret(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.botsService.regenerateSecret(id, user._id.toString());
+  }
+
+  @Patch(':id/main-flow')
+  @ApiOperation({ summary: 'Set (or clear) the main flow for a bot' })
+  setMainFlow(
+    @Param('id') id: string,
+    @Body() dto: SetMainFlowDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.botsService.setMainFlow(id, dto.flowId ?? null, user._id.toString());
+  }
+
+  @Get(':id/usage')
+  @ApiOperation({ summary: 'Get session/message usage stats for a bot' })
+  getUsage(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.botsService.getUsage(id, user._id.toString());
   }
 }

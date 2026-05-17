@@ -10,14 +10,15 @@ import {
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { RuntimeService } from './runtime.service';
+import { BotsService } from '../bots/bots.service';
 import { Public } from '../../common/decorators/public.decorator';
 
 class StartSessionDto {
   @IsString() @IsNotEmpty()
-  botId: string;
+  clientId: string;
 
   @IsString() @IsNotEmpty()
-  flowId: string;
+  clientSecret: string;
 
   @IsString() @IsOptional()
   userId?: string;
@@ -32,10 +33,14 @@ class SendMessageDto {
 @Public()
 @Controller('api/conversation')
 export class RuntimeController {
-  constructor(private readonly runtimeService: RuntimeService) {}
+  constructor(
+    private readonly runtimeService: RuntimeService,
+    private readonly botsService: BotsService,
+  ) {}
 
   /**
    * Start a new conversation session.
+   * Authenticates via clientId + clientSecret obtained from the bot's configuration page.
    * Returns a sessionId to be used in subsequent message calls.
    */
   @Post('start')
@@ -46,11 +51,17 @@ export class RuntimeController {
     description: 'Session started. Use sessionId to send messages.',
   })
   async start(@Body() dto: StartSessionDto) {
-    if (!dto.botId || !dto.flowId) {
-      throw new BadRequestException('botId and flowId are required');
+    if (!dto.clientId || !dto.clientSecret) {
+      throw new BadRequestException('clientId and clientSecret are required');
+    }
+    const bot = await this.botsService.findByClientCredentials(dto.clientId, dto.clientSecret);
+    if (!bot.mainFlowId) {
+      throw new BadRequestException(
+        'This bot has no main flow configured. Set one in the bot configuration page.',
+      );
     }
     const userId = dto.userId ?? `anon_${Date.now()}`;
-    const response = await this.runtimeService.startSession(dto.botId, dto.flowId, userId);
+    const response = await this.runtimeService.startSession(bot._id.toString(), bot.mainFlowId.toString(), userId);
     return {
       sessionId: response.sessionId,
       ...this.formatResponse(response),

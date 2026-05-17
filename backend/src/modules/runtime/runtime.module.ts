@@ -9,6 +9,7 @@ import {
 } from './schemas/conversation-session.schema';
 import { Flow, FlowSchema } from '../flows/schemas/flow.schema';
 import { Bot, BotSchema } from '../bots/schemas/bot.schema';
+import { BotsService } from '../bots/bots.service';
 import { NlpModule } from '../nlp/nlp.module';
 import { NodeExecutorRegistry } from '../../engine/node-executor.registry';
 import { NodeExecutorFactory } from '../../engine/node-executor.factory';
@@ -61,6 +62,7 @@ function createRegistryProvider() {
   providers: [
     RuntimeService,
     SessionService,
+    BotsService,
     createRegistryProvider(),
     NodeExecutorFactory,
   ],

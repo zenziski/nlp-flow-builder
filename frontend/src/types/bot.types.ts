@@ -9,7 +9,11 @@ export interface Bot {
     confidenceThreshold: number;
     fallbackMessage: string;
     welcomeMessage: string;
+    sessionTimeoutMinutes: number;
   };
+  clientId?: string;
+  clientSecret?: string;
+  mainFlowId?: string;
   createdAt: string;
   updatedAt: string;
 }
