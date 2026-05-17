@@ -14,6 +14,7 @@ export interface Bot {
   clientId?: string;
   clientSecret?: string;
   mainFlowId?: string;
+  runtimeBaseUrl?: string;
   createdAt: string;
   updatedAt: string;
 }

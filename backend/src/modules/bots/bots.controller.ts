@@ -38,8 +38,13 @@ export class BotsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a bot by ID' })
-  findOne(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.botsService.findOne(id, user._id.toString());
+  async findOne(@Param('id') id: string, @CurrentUser() user: any) {
+    const bot = await this.botsService.findOne(id, user._id.toString());
+    const backendUrl = process.env.BACKEND_URL ?? '';
+    return {
+      ...bot.toObject(),
+      runtimeBaseUrl: backendUrl ? `${backendUrl}/api/v1` : null,
+    };
   }
 
   @Post()

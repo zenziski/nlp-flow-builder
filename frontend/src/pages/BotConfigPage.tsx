@@ -166,10 +166,11 @@ export default function BotConfigPage() {
     }
   };
 
-  const runtimeUrl = `${RUNTIME_BASE}/api/conversation/start`;
-  const messageUrl = `${RUNTIME_BASE}/api/conversation/<sessionId>/message`;
+  const runtimeBase = bot.runtimeBaseUrl ?? RUNTIME_BASE;
+  const runtimeUrl = `${runtimeBase}/api/conversation/start`;
+  const messageUrl = `${runtimeBase}/api/conversation/<sessionId>/message`;
   const messagePayload = JSON.stringify({ text: 'Hello!' }, null, 2);
-  const messageCurl = `curl -X POST "${RUNTIME_BASE}/api/conversation/<sessionId>/message" \\
+  const messageCurl = `curl -X POST "${runtimeBase}/api/conversation/<sessionId>/message" \\
   -H "Content-Type: application/json" \\
   -d '{"text": "Hello!"}'`;
   const examplePayload = bot
