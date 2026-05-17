@@ -20,7 +20,9 @@ import type { Bot } from '../types/bot.types';
 import type { Flow } from '../types/flow.types';
 import Button from '../components/ui/Button';
 
-const RUNTIME_BASE = import.meta.env.VITE_RUNTIME_URL ?? window.location.origin;
+const API_BASE = import.meta.env.VITE_API_URL as string | undefined;
+const RUNTIME_BASE = import.meta.env.VITE_RUNTIME_URL
+  ?? (API_BASE ? API_BASE.replace(/\/api\/v\d+\/?$/, '') : window.location.origin);
 
 function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
