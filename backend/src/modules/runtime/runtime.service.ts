@@ -2,9 +2,11 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Flow, FlowDocument, NodeSubdoc, EdgeSubdoc } from '../flows/schemas/flow.schema';
+import { Bot, BotDocument } from '../bots/schemas/bot.schema';
 import { SessionService } from './session.service';
 import { NodeExecutorFactory } from '../../engine/node-executor.factory';
 import { ExecutionContext, BotOutput, ExecutionLog } from '../../engine/engine.types';
+import { VaultService } from '../vault/vault.service';
 
 const MAX_ITERATIONS = 50;
 
@@ -23,8 +25,10 @@ export interface RuntimeResponse {
 export class RuntimeService {
   constructor(
     @InjectModel(Flow.name) private flowModel: Model<FlowDocument>,
+    @InjectModel(Bot.name) private botModel: Model<BotDocument>,
     private sessionService: SessionService,
     private executorFactory: NodeExecutorFactory,
+    private vaultService: VaultService,
   ) {}
 
   async startSession(
@@ -80,6 +84,14 @@ export class RuntimeService {
     let currentNode = startNode;
     let variables = { ...(session.variables ?? {}) };
     let context = { ...(session.context ?? {}) };
+
+    // Inject vault variables as a read-only namespace accessible via {{vault.KEY}}
+    const bot = await this.botModel.findById(session.botId).exec();
+    if (bot) {
+      const vaultMap = await this.vaultService.getDecryptedMapForUser(bot.createdBy.toString());
+      variables = { ...variables, vault: vaultMap };
+    }
+
     let currentInput: string | undefined = input;
     const outputs: BotOutput[] = [];
     const logs: ExecutionLog[] = [];
@@ -184,9 +196,11 @@ export class RuntimeService {
       currentNode = nextNode;
     }
 
+    // Strip vault namespace before persisting — vault values are loaded fresh each execution
+    const { vault: _vault, ...variablesToSave } = variables as any;
     await this.sessionService.updateState(sessionId, {
       currentNodeId: currentNode.id,
-      variables,
+      variables: variablesToSave,
       context,
     });
 

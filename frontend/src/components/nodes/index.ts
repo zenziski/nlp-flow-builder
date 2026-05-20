@@ -7,6 +7,7 @@ import ConditionNode from './ConditionNode';
 import SwitchNode from './SwitchNode';
 import DelayNode from './DelayNode';
 import ApiNode from './ApiNode';
+import AiNode from './AiNode';
 import VariableNode from './VariableNode';
 import RedirectNode from './RedirectNode';
 import RandomNode from './RandomNode';
@@ -22,6 +23,7 @@ export const nodeTypes = {
   switchNode: SwitchNode,
   delayNode: DelayNode,
   apiNode: ApiNode,
+  aiNode: AiNode,
   variableNode: VariableNode,
   redirectNode: RedirectNode,
   randomNode: RandomNode,
@@ -58,6 +60,7 @@ export const NODE_PALETTE = [
     nodes: [
       { type: 'variableNode', label: 'Variable', description: 'Set/update variable' },
       { type: 'apiNode', label: 'API Call', description: 'HTTP request' },
+      { type: 'aiNode', label: 'AI', description: 'Call an AI model' },
       { type: 'delayNode', label: 'Delay', description: 'Wait before continuing' },
     ],
   },

@@ -5,6 +5,7 @@ import IntentNodeForm from './forms/IntentNodeForm';
 import ConditionNodeForm from './forms/ConditionNodeForm';
 import VariableNodeForm from './forms/VariableNodeForm';
 import ApiNodeForm from './forms/ApiNodeForm';
+import AiNodeForm from './forms/AiNodeForm';
 import DelayNodeForm from './forms/DelayNodeForm';
 import SwitchNodeForm from './forms/SwitchNodeForm';
 import SubflowNodeForm from './forms/SubflowNodeForm';
@@ -18,6 +19,7 @@ const formMap: Record<string, React.FC<{ nodeId: string; data: any }>> = {
   conditionNode: ConditionNodeForm,
   variableNode: VariableNodeForm,
   apiNode: ApiNodeForm,
+  aiNode: AiNodeForm,
   delayNode: DelayNodeForm,
   switchNode: SwitchNodeForm,
   subflowNode: SubflowNodeForm,

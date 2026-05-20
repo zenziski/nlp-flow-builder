@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNodesStore } from '../../../stores/useNodesStore';
+import { VariableInput } from '../../ui/VariableSuggest';
 
 const OPERATORS = ['equals', 'notEquals', 'contains', 'regex', 'greaterThan', 'lowerThan', 'exists', 'notExists'];
 
@@ -20,7 +21,7 @@ export default function ConditionNodeForm({ nodeId, data }: Props) {
       <p className="text-xs text-slate-400">If condition is true → "yes" handle, otherwise → "no"</p>
       <div>
         <label className="text-xs text-slate-400">Left value</label>
-        <input
+        <VariableInput
           value={cond.left}
           onChange={(e) => update({ left: e.target.value })}
           placeholder="{{variable}} or literal"
@@ -40,7 +41,7 @@ export default function ConditionNodeForm({ nodeId, data }: Props) {
       {!['exists', 'notExists'].includes(cond.operator) && (
         <div>
           <label className="text-xs text-slate-400">Right value</label>
-          <input
+          <VariableInput
             value={cond.right}
             onChange={(e) => update({ right: e.target.value })}
             placeholder="value to compare"

@@ -11,6 +11,7 @@ import { Flow, FlowSchema } from '../flows/schemas/flow.schema';
 import { Bot, BotSchema } from '../bots/schemas/bot.schema';
 import { BotsService } from '../bots/bots.service';
 import { NlpModule } from '../nlp/nlp.module';
+import { VaultModule } from '../vault/vault.module';
 import { NodeExecutorRegistry } from '../../engine/node-executor.registry';
 import { NodeExecutorFactory } from '../../engine/node-executor.factory';
 import { StartNodeExecutor } from '../../engine/executors/start.executor';
@@ -22,6 +23,7 @@ import { ConditionNodeExecutor } from '../../engine/executors/condition.executor
 import { SwitchNodeExecutor } from '../../engine/executors/switch.executor';
 import { DelayNodeExecutor } from '../../engine/executors/delay.executor';
 import { ApiNodeExecutor } from '../../engine/executors/api.executor';
+import { AiNodeExecutor } from '../../engine/executors/ai.executor';
 import { VariableNodeExecutor } from '../../engine/executors/variable.executor';
 import { RedirectNodeExecutor } from '../../engine/executors/redirect.executor';
 import { RandomNodeExecutor } from '../../engine/executors/random.executor';
@@ -41,6 +43,7 @@ function createRegistryProvider() {
       registry.register('switchNode', SwitchNodeExecutor);
       registry.register('delayNode', DelayNodeExecutor);
       registry.register('apiNode', ApiNodeExecutor);
+      registry.register('aiNode', AiNodeExecutor);
       registry.register('variableNode', VariableNodeExecutor);
       registry.register('redirectNode', RedirectNodeExecutor);
       registry.register('randomNode', RandomNodeExecutor);
@@ -58,6 +61,7 @@ function createRegistryProvider() {
       { name: Bot.name, schema: BotSchema },
     ]),
     NlpModule,
+    VaultModule,
   ],
   providers: [
     RuntimeService,

@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Clock,
+  Download,
   MessageCircle,
   RefreshCw,
   Users,
@@ -14,6 +15,7 @@ import {
   TrendingUp,
   GitFork,
 } from 'lucide-react';
+import ExcelJS from 'exceljs';
 import { botsService } from '../../services/bots.service';
 import PathGraph from './PathGraph';
 
@@ -93,6 +95,188 @@ function StatusBar({
   );
 }
 
+// ── Excel export ─────────────────────────────────────────────────────────────
+
+const BRAND = 'D35A2F'; // brand orange (no #)
+const HEADER_BG = 'FFF0E4';
+
+function styleHeader(ws: ExcelJS.Worksheet, row: number, cols: number) {
+  const r = ws.getRow(row);
+  for (let c = 1; c <= cols; c++) {
+    const cell = r.getCell(c);
+    cell.font = { bold: true, color: { argb: `FF${BRAND}` } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: `FF${HEADER_BG}` } };
+    cell.border = {
+      bottom: { style: 'thin', color: { argb: `FF${BRAND}` } },
+    };
+  }
+}
+
+async function exportBotAnalytics(
+  botName: string,
+  data: DetailedUsage,
+  pathData: PathData | null,
+) {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'MBRF NLP Flow Builder';
+  wb.created = new Date();
+
+  // ── Sheet 1: Summary ──────────────────────────────────────────────────────
+  const summary = wb.addWorksheet('Summary');
+  summary.columns = [
+    { header: 'Metric', key: 'metric', width: 30 },
+    { header: 'Value', key: 'value', width: 20 },
+  ];
+  styleHeader(summary, 1, 2);
+  summary.addRows([
+    { metric: 'Bot name', value: botName },
+    { metric: 'Exported at', value: new Date().toLocaleString() },
+    { metric: 'Total sessions', value: data.totalSessions },
+    { metric: 'Total messages', value: data.totalMessages },
+    { metric: 'Unique users', value: data.uniqueUsers },
+    { metric: 'Returning users', value: data.returningUsers },
+    { metric: 'Sessions per user', value: data.uniqueUsers > 0 ? +(data.totalSessions / data.uniqueUsers).toFixed(2) : 0 },
+    { metric: 'Avg messages / session', value: data.avgMessagesPerSession },
+    { metric: 'Max messages in one session', value: data.maxMessagesInSession },
+    { metric: 'Avg session duration (seconds)', value: data.avgSessionDurationSec },
+    { metric: 'Completion rate (%)', value: data.completionRate },
+  ]);
+
+  // ── Sheet 2: Session status breakdown ────────────────────────────────────
+  const status = wb.addWorksheet('Status Breakdown');
+  status.columns = [
+    { header: 'Status', key: 'status', width: 18 },
+    { header: 'Count', key: 'count', width: 12 },
+    { header: '% of total', key: 'pct', width: 14 },
+  ];
+  styleHeader(status, 1, 3);
+  const total = data.statusBreakdown.active + data.statusBreakdown.completed + data.statusBreakdown.expired + data.statusBreakdown.error;
+  const statusRows = [
+    { status: 'Completed', count: data.statusBreakdown.completed },
+    { status: 'Active', count: data.statusBreakdown.active },
+    { status: 'Expired', count: data.statusBreakdown.expired },
+    { status: 'Error', count: data.statusBreakdown.error },
+  ];
+  for (const r of statusRows) {
+    status.addRow({ ...r, pct: total > 0 ? +((r.count / total) * 100).toFixed(1) : 0 });
+  }
+
+  // ── Sheet 3: Monthly trend ────────────────────────────────────────────────
+  const monthly = wb.addWorksheet('Monthly Trend');
+  monthly.columns = [
+    { header: 'Month', key: 'label', width: 14 },
+    { header: 'Sessions', key: 'sessions', width: 12 },
+    { header: 'Messages', key: 'messages', width: 12 },
+  ];
+  styleHeader(monthly, 1, 3);
+  monthly.addRows(data.chart);
+
+  // ── Sheet 4: Hourly distribution ─────────────────────────────────────────
+  const hourly = wb.addWorksheet('Hourly Distribution');
+  hourly.columns = [
+    { header: 'Hour', key: 'hour', width: 10 },
+    { header: 'Label', key: 'label', width: 12 },
+    { header: 'Sessions', key: 'count', width: 12 },
+  ];
+  styleHeader(hourly, 1, 3);
+  hourly.addRows(
+    data.hourly.map((h) => ({
+      hour: h.hour,
+      label: formatHour(h.hour),
+      count: h.count,
+    })),
+  );
+
+  // ── Sheet 5: Day of week ──────────────────────────────────────────────────
+  const dow = wb.addWorksheet('Day of Week');
+  dow.columns = [
+    { header: 'Day', key: 'day', width: 14 },
+    { header: 'Sessions', key: 'count', width: 12 },
+  ];
+  styleHeader(dow, 1, 2);
+  const DOW_ORDER = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const sortedDow = [...data.dow].sort((a, b) => DOW_ORDER.indexOf(a.day) - DOW_ORDER.indexOf(b.day));
+  dow.addRows(sortedDow);
+
+  // ── Sheet 6: Top intents ──────────────────────────────────────────────────
+  const intents = wb.addWorksheet('Top Intents');
+  intents.columns = [
+    { header: 'Rank', key: 'rank', width: 8 },
+    { header: 'Intent', key: 'intent', width: 30 },
+    { header: 'Triggers', key: 'count', width: 12 },
+    { header: 'Avg confidence (%)', key: 'avgConf', width: 20 },
+  ];
+  styleHeader(intents, 1, 4);
+  intents.addRows(
+    data.topIntents.map((t, i) => ({
+      rank: i + 1,
+      intent: t.intent,
+      count: t.count,
+      avgConf: +((t.avgScore * 100).toFixed(1)),
+    })),
+  );
+
+  // ── Sheet 7: Recent sessions ──────────────────────────────────────────────
+  const sessions = wb.addWorksheet('Recent Sessions');
+  sessions.columns = [
+    { header: 'Session ID', key: 'sessionId', width: 28 },
+    { header: 'User ID', key: 'userId', width: 28 },
+    { header: 'Status', key: 'status', width: 14 },
+    { header: 'Messages', key: 'messageCount', width: 12 },
+    { header: 'Created at', key: 'createdAt', width: 22 },
+    { header: 'Last activity', key: 'lastActivityAt', width: 22 },
+  ];
+  styleHeader(sessions, 1, 6);
+  sessions.addRows(
+    data.recentActivity.map((s) => ({
+      ...s,
+      createdAt: new Date(s.createdAt).toLocaleString(),
+      lastActivityAt: new Date(s.lastActivityAt).toLocaleString(),
+    })),
+  );
+
+  // ── Sheet 8: Path analysis (nodes) ───────────────────────────────────────
+  if (pathData) {
+    const nodes = wb.addWorksheet('Path - Nodes');
+    nodes.columns = [
+      { header: 'Node ID', key: 'id', width: 28 },
+      { header: 'Label', key: 'label', width: 28 },
+      { header: 'Type', key: 'type', width: 16 },
+      { header: 'Visit count', key: 'visitCount', width: 14 },
+    ];
+    styleHeader(nodes, 1, 4);
+    nodes.addRows(
+      [...pathData.nodes].sort((a, b) => b.visitCount - a.visitCount),
+    );
+
+    const edges = wb.addWorksheet('Path - Edges');
+    edges.columns = [
+      { header: 'From node', key: 'from', width: 28 },
+      { header: 'To node', key: 'to', width: 28 },
+      { header: 'Traversal count', key: 'count', width: 18 },
+    ];
+    styleHeader(edges, 1, 3);
+    edges.addRows(
+      [...pathData.edges].sort((a, b) => b.count - a.count),
+    );
+  }
+
+  // ── Write & download ─────────────────────────────────────────────────────
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const slug = botName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  a.download = `${slug}-analytics-${new Date().toISOString().slice(0, 10)}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface Props {
   botId: string;
   botName: string;
@@ -103,6 +287,7 @@ export default function BotDetailUsage({ botId, botName }: Props) {
   const [pathData, setPathData] = useState<PathData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const load = (silent = false) => {
     if (!silent) setLoading(true);
@@ -168,13 +353,33 @@ export default function BotDetailUsage({ botId, botName }: Props) {
             <p className="text-xs text-[#9e7f6f]">Detailed analytics — real conversations only</p>
           </div>
         </div>
-        <button
-          onClick={() => load(true)}
-          className="flex items-center gap-1.5 rounded-xl border border-[#e4cfc4] bg-white px-3 py-2 text-xs font-semibold text-[#9e7f6f] transition hover:bg-[#fff0e4]"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              if (!data) return;
+              setExporting(true);
+              try {
+                await exportBotAnalytics(botName, data, pathData);
+              } catch {
+                // silently ignore export errors
+              } finally {
+                setExporting(false);
+              }
+            }}
+            disabled={exporting}
+            className="flex items-center gap-1.5 rounded-xl border border-[#e4cfc4] bg-white px-3 py-2 text-xs font-semibold text-[#9e7f6f] transition hover:bg-[#fff0e4] disabled:opacity-50"
+          >
+            <Download className={`h-3.5 w-3.5 ${exporting ? 'animate-pulse' : ''}`} />
+            {exporting ? 'Exporting…' : 'Export'}
+          </button>
+          <button
+            onClick={() => load(true)}
+            className="flex items-center gap-1.5 rounded-xl border border-[#e4cfc4] bg-white px-3 py-2 text-xs font-semibold text-[#9e7f6f] transition hover:bg-[#fff0e4]"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Key metrics row */}

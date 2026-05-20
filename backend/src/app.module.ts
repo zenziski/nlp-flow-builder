@@ -12,6 +12,7 @@ import { RuntimeModule } from './modules/runtime/runtime.module';
 import { SimulatorModule } from './modules/simulator/simulator.module';
 import { VariablesModule } from './modules/variables/variables.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { VaultModule } from './modules/vault/vault.module';
 import { SeedModule } from './database/seed/seed.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
@@ -29,6 +30,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     SimulatorModule,
     VariablesModule,
     IntegrationsModule,
+    VaultModule,
     SeedModule,
   ],
   providers: [

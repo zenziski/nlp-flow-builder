@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { useFlowStore } from '../stores/useFlowStore';
+import { useVaultStore } from '../stores/useVaultStore';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import FlowCanvas from '../components/builder/FlowCanvas';
@@ -14,11 +15,15 @@ export default function BuilderPage() {
   const { botId, flowId } = useParams<{ botId: string; flowId: string }>();
   const [showSimulator, setShowSimulator] = useState(false);
   const { setActiveFlow } = useFlowStore();
+  const fetchVault = useVaultStore((s) => s.fetch);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useAutoSave(true, 6000);
   useKeyboardShortcuts();
+
+  // Pre-fetch vault so variable suggestions include vault entries
+  useEffect(() => { fetchVault(); }, []);
 
   useEffect(() => {
     if (!botId || !flowId) return;

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNodesStore } from '../../../stores/useNodesStore';
+import { VariableInput } from '../../ui/VariableSuggest';
 
 const ACTIONS = ['set', 'unset', 'increment', 'decrement', 'append'];
 const SCOPES = ['session', 'global', 'temp'];
@@ -33,7 +34,7 @@ export default function VariableNodeForm({ nodeId, data }: Props) {
       {state.action !== 'unset' && (
         <div>
           <label className="text-xs text-slate-400">Value</label>
-          <input value={state.value} onChange={(e) => update({ value: e.target.value })} placeholder="value or {{variable}}"
+          <VariableInput value={state.value} onChange={(e) => update({ value: e.target.value })} placeholder="value or {{variable}}"
             className="mt-0.5 w-full px-2 py-1.5 rounded bg-slate-800 border border-slate-600 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
         </div>
       )}

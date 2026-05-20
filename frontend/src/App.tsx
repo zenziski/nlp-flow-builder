@@ -12,6 +12,7 @@ import BotConfigPage from './pages/BotConfigPage';
 import UsagePage from './pages/UsagePage';
 import ConversationsPage from './pages/ConversationsPage';
 import AppLayout from './components/layout/AppLayout';
+import VaultPage from './pages/VaultPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="bots/:botId/config" element={<BotConfigPage />} />
           <Route path="analytics" element={<UsagePage />} />
           <Route path="conversations" element={<ConversationsPage />} />
+          <Route path="vault" element={<VaultPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useNodesStore } from '../../../stores/useNodesStore';
+import { VariableInput, VariableTextarea } from '../../ui/VariableSuggest';
 
 interface HeaderRow { key: string; value: string; }
 interface MappingRow { path: string; saveAs: string; }
@@ -72,7 +73,7 @@ export default function ApiNodeForm({ nodeId, data }: Props) {
           className="px-2 py-1.5 rounded bg-slate-800 border border-slate-600 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-20">
           {['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].map((m) => <option key={m}>{m}</option>)}
         </select>
-        <input value={state.url} onChange={(e) => update({ url: e.target.value })} placeholder="https://api.example.com/endpoint"
+        <VariableInput value={state.url} onChange={(e) => update({ url: e.target.value })} placeholder="https://api.example.com/endpoint"
           className="flex-1 px-2 py-1.5 rounded bg-slate-800 border border-slate-600 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
       </div>
 
@@ -90,7 +91,7 @@ export default function ApiNodeForm({ nodeId, data }: Props) {
                 <input value={h.key} onChange={(e) => changeHeader(i, 'key', e.target.value)}
                   placeholder="Key"
                   className="w-[38%] px-2 py-1 rounded bg-slate-800 border border-slate-600 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-                <input value={h.value} onChange={(e) => changeHeader(i, 'value', e.target.value)}
+                <VariableInput value={h.value} onChange={(e) => changeHeader(i, 'value', e.target.value)}
                   placeholder="Value"
                   className="flex-1 px-2 py-1 rounded bg-slate-800 border border-slate-600 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
                 <button onClick={() => removeHeader(i)} className="text-slate-500 hover:text-red-400 flex-shrink-0">
@@ -105,7 +106,7 @@ export default function ApiNodeForm({ nodeId, data }: Props) {
       {['POST', 'PUT', 'PATCH'].includes(state.method) && (
         <div>
           <label className="text-xs text-slate-400">Request body (JSON)</label>
-          <textarea value={state.body} onChange={(e) => update({ body: e.target.value })} rows={3} placeholder='{"key": "{{variable}}"}'
+          <VariableTextarea value={state.body} onChange={(e) => update({ body: e.target.value })} rows={3} placeholder='{"key": "{{variable}}"}'
             className="mt-0.5 w-full px-2 py-1.5 rounded bg-slate-800 border border-slate-600 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none font-mono" />
         </div>
       )}

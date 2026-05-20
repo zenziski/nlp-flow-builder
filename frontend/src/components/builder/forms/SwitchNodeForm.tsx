@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useNodesStore } from '../../../stores/useNodesStore';
 import Button from '../../ui/Button';
+import { VariableInput } from '../../ui/VariableSuggest';
 
 interface SwitchCase { value: string; handle: string; }
 interface Props { nodeId: string; data: any; }
@@ -33,7 +34,7 @@ export default function SwitchNodeForm({ nodeId, data }: Props) {
     <div className="space-y-3">
       <div>
         <label className="text-xs text-slate-400">Variable to switch on</label>
-        <input value={variable}
+        <VariableInput value={variable}
           onChange={(e) => { setVariable(e.target.value); updateNodeData(nodeId, { variable: e.target.value }); }}
           placeholder="{{user.status}}"
           className="mt-0.5 w-full px-2 py-1.5 rounded bg-slate-800 border border-slate-600 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono" />

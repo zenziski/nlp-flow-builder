@@ -13,6 +13,7 @@ export type NodeType =
   | 'switchNode'
   | 'delayNode'
   | 'apiNode'
+  | 'aiNode'
   | 'variableNode'
   | 'redirectNode'
   | 'randomNode'

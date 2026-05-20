@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { Bot, LayoutDashboard, Settings, LogOut, BarChart2, MessagesSquare } from 'lucide-react';
+import { Bot, LayoutDashboard, Settings, LogOut, BarChart2, MessagesSquare, KeyRound } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
 
 const navItems = [
@@ -7,6 +7,7 @@ const navItems = [
   { to: '/bots', icon: Bot, label: 'Bots' },
   { to: '/analytics', icon: BarChart2, label: 'Analytics' },
   { to: '/conversations', icon: MessagesSquare, label: 'Conversations' },
+  { to: '/vault', icon: KeyRound, label: 'Vault' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 

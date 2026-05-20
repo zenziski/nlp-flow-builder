@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useNodesStore } from '../../../stores/useNodesStore';
 import Button from '../../ui/Button';
+import { VariableTextarea } from '../../ui/VariableSuggest';
 
 interface Props { nodeId: string; data: any; }
 
@@ -26,7 +27,7 @@ export default function MessageNodeForm({ nodeId, data }: Props) {
       <p className="text-xs text-slate-400">Messages (sent in sequence)</p>
       {messages.map((msg, i) => (
         <div key={i} className="flex gap-1">
-          <textarea
+          <VariableTextarea
             value={msg}
             onChange={(e) => change(i, e.target.value)}
             rows={2}
