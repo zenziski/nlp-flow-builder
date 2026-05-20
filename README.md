@@ -54,12 +54,3 @@ npm run dev
 | Variable | Description |
 |---|---|
 | `VITE_API_URL` | Backend base URL |
-
-## Deploying to Railway
-
-Deploy the `backend` and `frontend` services separately. Set the following on the frontend service:
-
-```
-BACKEND_URL=https://<your-backend>.up.railway.app
-VITE_API_URL=https://<your-backend>.up.railway.app
-```
