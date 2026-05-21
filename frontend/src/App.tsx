@@ -13,6 +13,9 @@ import UsagePage from './pages/UsagePage';
 import ConversationsPage from './pages/ConversationsPage';
 import AppLayout from './components/layout/AppLayout';
 import VaultPage from './pages/VaultPage';
+import TeamPage from './pages/TeamPage';
+import BillingPage from './pages/BillingPage';
+import AcceptInvitePage from './pages/AcceptInvitePage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -28,6 +31,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/invite/:token" element={<AcceptInvitePage />} />
         <Route
           path="/"
           element={
@@ -45,6 +49,8 @@ export default function App() {
           <Route path="conversations" element={<ConversationsPage />} />
           <Route path="vault" element={<VaultPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="team" element={<TeamPage />} />
+          <Route path="billing" element={<BillingPage />} />
         </Route>
         <Route
           path="/builder/:botId/:flowId"

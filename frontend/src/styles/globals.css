@@ -66,6 +66,18 @@
     box-shadow: 0 30px 60px -48px rgba(89, 45, 22, 0.85);
   }
 
+  .input-field {
+    @apply w-full rounded-xl border border-[#ead5c8] bg-white px-3 py-2.5 text-sm text-slate-800 outline-none transition-colors;
+    font-family: 'Manrope', sans-serif;
+    color: var(--text);
+  }
+  .input-field::placeholder {
+    @apply text-slate-300;
+  }
+  .input-field:focus {
+    @apply border-[#d35a2f] ring-2 ring-[#d35a2f]/20;
+  }
+
   .surface-card {
     @apply rounded-[1.35rem] border;
     border-color: var(--line);

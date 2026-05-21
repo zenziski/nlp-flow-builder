@@ -9,6 +9,7 @@ export type NodeType =
   | 'conditionNode'
   | 'switchNode'
   | 'delayNode'
+  | 'aiNode'
   | 'apiNode'
   | 'variableNode'
   | 'redirectNode'

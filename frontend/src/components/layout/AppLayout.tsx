@@ -1,19 +1,52 @@
-import { Outlet, NavLink } from 'react-router-dom';
-import { Bot, LayoutDashboard, Settings, LogOut, BarChart2, MessagesSquare, KeyRound } from 'lucide-react';
+import { useEffect } from 'react';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Bot, LayoutDashboard, Settings, LogOut, BarChart2, MessagesSquare, KeyRound, Users, CreditCard } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { useTeamStore } from '../../stores/useTeamStore';
+import { MemberRole } from '../../types/team.types';
 
-const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/bots', icon: Bot, label: 'Bots' },
-  { to: '/analytics', icon: BarChart2, label: 'Analytics' },
-  { to: '/conversations', icon: MessagesSquare, label: 'Conversations' },
-  { to: '/vault', icon: KeyRound, label: 'Vault' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
+const ALL_NAV_ITEMS = [
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', pageKey: 'dashboard' },
+  { to: '/bots', icon: Bot, label: 'Bots', pageKey: 'bots' },
+  { to: '/analytics', icon: BarChart2, label: 'Analytics', pageKey: 'analytics' },
+  { to: '/conversations', icon: MessagesSquare, label: 'Conversations', pageKey: 'conversations' },
+  { to: '/vault', icon: KeyRound, label: 'Vault', pageKey: 'vault' },
+  { to: '/billing', icon: CreditCard, label: 'Billing', pageKey: 'billing' },
+  { to: '/settings', icon: Settings, label: 'Settings', pageKey: 'settings' },
 ];
 
 export default function AppLayout() {
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
+  const { membership, fetchMyOrg } = useTeamStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (user?.organizationId && !membership) {
+      fetchMyOrg();
+    }
+  }, [user?.organizationId]);
+
+  const isAdminOrOwner =
+    !membership ||
+    membership.role === MemberRole.OWNER ||
+    membership.role === MemberRole.ADMIN;
+
+  const visibleNavItems = ALL_NAV_ITEMS.filter(
+    (item) => isAdminOrOwner || membership?.permissions.pages.includes(item.pageKey),
+  );
+
+  // Redirect if current page is not accessible for this member
+  useEffect(() => {
+    if (!membership || isAdminOrOwner) return;
+    const current = ALL_NAV_ITEMS.find((n) => location.pathname.startsWith(n.to));
+    if (current && !membership.permissions.pages.includes(current.pageKey)) {
+      const first = membership.permissions.pages[0];
+      const fallback = ALL_NAV_ITEMS.find((n) => n.pageKey === first);
+      navigate(fallback?.to ?? '/dashboard', { replace: true });
+    }
+  }, [membership, location.pathname]);
 
   return (
     <div className="app-shell flex min-h-screen bg-white p-3 text-slate-900 md:p-5">
@@ -31,7 +64,7 @@ export default function AppLayout() {
         </div>
 
         <nav className="flex-1 space-y-1.5 p-2 md:p-3">
-          {navItems.map(({ to, icon: Icon, label }) => (
+          {visibleNavItems.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
@@ -47,6 +80,23 @@ export default function AppLayout() {
               <span className="hidden md:block">{label}</span>
             </NavLink>
           ))}
+
+          {/* Team — only for admin/owner */}
+          {isAdminOrOwner && (
+            <NavLink
+              to="/team"
+              className={({ isActive }) =>
+                `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                  isActive
+                    ? 'bg-[var(--brand)] text-white shadow-[0_14px_26px_-18px_rgba(211,90,47,0.9)]'
+                    : 'text-slate-700 hover:bg-[#fff1e9] hover:text-slate-900'
+                }`
+              }
+            >
+              <Users className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden md:block">Team</span>
+            </NavLink>
+          )}
         </nav>
 
         <div className="border-t border-[#efd6ca] p-2 md:p-3">
@@ -69,3 +119,4 @@ export default function AppLayout() {
     </div>
   );
 }
+
