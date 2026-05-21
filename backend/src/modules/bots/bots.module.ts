@@ -8,6 +8,7 @@ import {
   ConversationSessionSchema,
 } from '../runtime/schemas/conversation-session.schema';
 import { Flow, FlowSchema } from '../flows/schemas/flow.schema';
+import { OrganizationsModule } from '../organizations/organizations.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { Flow, FlowSchema } from '../flows/schemas/flow.schema';
       { name: ConversationSession.name, schema: ConversationSessionSchema },
       { name: Flow.name, schema: FlowSchema },
     ]),
+    OrganizationsModule,
   ],
   controllers: [BotsController],
   providers: [BotsService],

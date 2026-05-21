@@ -9,6 +9,14 @@ import {
   ConversationSession,
   ConversationSessionSchema,
 } from '../../modules/runtime/schemas/conversation-session.schema';
+import {
+  Organization,
+  OrganizationSchema,
+} from '../../modules/organizations/schemas/organization.schema';
+import {
+  OrganizationMember,
+  OrganizationMemberSchema,
+} from '../../modules/organizations/schemas/organization-member.schema';
 
 @Module({
   imports: [
@@ -18,6 +26,8 @@ import {
       { name: Flow.name, schema: FlowSchema },
       { name: Intent.name, schema: IntentSchema },
       { name: ConversationSession.name, schema: ConversationSessionSchema },
+      { name: Organization.name, schema: OrganizationSchema },
+      { name: OrganizationMember.name, schema: OrganizationMemberSchema },
     ]),
   ],
   providers: [SeedService],

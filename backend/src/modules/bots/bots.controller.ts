@@ -27,19 +27,19 @@ export class BotsController {
   @Get()
   @ApiOperation({ summary: 'List all bots for current user' })
   findAll(@CurrentUser() user: any) {
-    return this.botsService.findAll(user._id.toString());
+    return this.botsService.findAll(user._id.toString(), user.organizationId);
   }
 
   @Get('usage-overview')
   @ApiOperation({ summary: 'Get aggregated usage across all bots for current user' })
   getUsageOverview(@CurrentUser() user: any) {
-    return this.botsService.getUsageOverview(user._id.toString());
+    return this.botsService.getUsageOverview(user._id.toString(), user.organizationId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a bot by ID' })
   async findOne(@Param('id') id: string, @CurrentUser() user: any) {
-    const bot = await this.botsService.findOne(id, user._id.toString());
+    const bot = await this.botsService.findOne(id, user._id.toString(), user.organizationId);
     const backendUrl = process.env.BACKEND_URL ?? '';
     return {
       ...bot.toObject(),
@@ -50,7 +50,7 @@ export class BotsController {
   @Post()
   @ApiOperation({ summary: 'Create a new bot' })
   create(@Body() dto: CreateBotDto, @CurrentUser() user: any) {
-    return this.botsService.create(dto, user._id.toString());
+    return this.botsService.create(dto, user._id.toString(), user.organizationId);
   }
 
   @Patch(':id')
@@ -60,19 +60,19 @@ export class BotsController {
     @Body() dto: UpdateBotDto,
     @CurrentUser() user: any,
   ) {
-    return this.botsService.update(id, dto, user._id.toString());
+    return this.botsService.update(id, dto, user._id.toString(), user.organizationId);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a bot' })
   remove(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.botsService.remove(id, user._id.toString());
+    return this.botsService.remove(id, user._id.toString(), user.organizationId);
   }
 
   @Post(':id/regenerate-secret')
   @ApiOperation({ summary: 'Regenerate the Runtime API client secret for a bot' })
   regenerateSecret(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.botsService.regenerateSecret(id, user._id.toString());
+    return this.botsService.regenerateSecret(id, user._id.toString(), user.organizationId);
   }
 
   @Patch(':id/main-flow')
@@ -82,31 +82,31 @@ export class BotsController {
     @Body() dto: SetMainFlowDto,
     @CurrentUser() user: any,
   ) {
-    return this.botsService.setMainFlow(id, dto.flowId ?? null, user._id.toString());
+    return this.botsService.setMainFlow(id, dto.flowId ?? null, user._id.toString(), user.organizationId);
   }
 
   @Get(':id/usage')
   @ApiOperation({ summary: 'Get session/message usage stats for a bot' })
   getUsage(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.botsService.getUsage(id, user._id.toString());
+    return this.botsService.getUsage(id, user._id.toString(), user.organizationId);
   }
 
   @Get(':id/usage/detailed')
   @ApiOperation({ summary: 'Get detailed analytics for a specific bot' })
   getDetailedUsage(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.botsService.getDetailedUsage(id, user._id.toString());
+    return this.botsService.getDetailedUsage(id, user._id.toString(), user.organizationId);
   }
 
   @Get(':id/usage/path-analysis')
   @ApiOperation({ summary: 'Get user path / flow traversal analysis for a bot' })
   getPathAnalysis(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.botsService.getPathAnalysis(id, user._id.toString());
+    return this.botsService.getPathAnalysis(id, user._id.toString(), user.organizationId);
   }
 
   @Get(':id/sessions')
   @ApiOperation({ summary: 'List real conversation sessions for a bot' })
   getSessions(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.botsService.getSessions(id, user._id.toString());
+    return this.botsService.getSessions(id, user._id.toString(), user.organizationId);
   }
 
   @Get(':id/sessions/:sessionId')
@@ -116,6 +116,6 @@ export class BotsController {
     @Param('sessionId') sessionId: string,
     @CurrentUser() user: any,
   ) {
-    return this.botsService.getSession(id, sessionId, user._id.toString());
+    return this.botsService.getSession(id, sessionId, user._id.toString(), user.organizationId);
   }
 }

@@ -1,8 +1,9 @@
 import { Injectable, OnApplicationBootstrap, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import { User, UserDocument } from '../../modules/auth/schemas/user.schema';
 import { Bot, BotDocument } from '../../modules/bots/schemas/bot.schema';
 import { Flow, FlowDocument } from '../../modules/flows/schemas/flow.schema';
@@ -11,6 +12,16 @@ import {
   ConversationSession,
   ConversationSessionDocument,
 } from '../../modules/runtime/schemas/conversation-session.schema';
+import {
+  Organization,
+  OrganizationDocument,
+} from '../../modules/organizations/schemas/organization.schema';
+import {
+  OrganizationMember,
+  OrganizationMemberDocument,
+  MemberRole,
+  InviteStatus,
+} from '../../modules/organizations/schemas/organization-member.schema';
 import { exampleFlow } from './seed-data/example-flow.seed';
 import { analyticsBotFlow, analyticsIntents } from './seed-data/analytics-bot-flow.seed';
 import { generateAnalyticsSessions } from './seed-data/analytics-sessions.seed';
@@ -26,6 +37,9 @@ export class SeedService implements OnApplicationBootstrap {
     @InjectModel(Intent.name) private intentModel: Model<IntentDocument>,
     @InjectModel(ConversationSession.name)
     private sessionModel: Model<ConversationSessionDocument>,
+    @InjectModel(Organization.name) private orgModel: Model<OrganizationDocument>,
+    @InjectModel(OrganizationMember.name)
+    private memberModel: Model<OrganizationMemberDocument>,
     private config: ConfigService,
   ) {}
 
@@ -53,11 +67,29 @@ export class SeedService implements OnApplicationBootstrap {
       role: 'admin',
     });
 
+    // Create the organization for the seed user
+    const org = await this.orgModel.create({
+      name: "Admin User's Workspace",
+      ownerId: user._id,
+    });
+    await this.memberModel.create({
+      organizationId: org._id,
+      userId: user._id,
+      inviteEmail: 'admin@example.com',
+      inviteStatus: InviteStatus.ACCEPTED,
+      role: MemberRole.OWNER,
+      permissions: { pages: [], bots: [] },
+    });
+    await this.userModel.updateOne({ _id: user._id }, { organizationId: org._id });
+
     const bot = await this.botModel.create({
       name: 'Customer Support Bot',
       description: 'Demo bot for customer support',
       language: 'pt',
       createdBy: user._id,
+      organizationId: org._id,
+      clientId: randomBytes(16).toString('hex'),
+      clientSecret: randomBytes(32).toString('hex'),
       settings: {
         confidenceThreshold: 0.6,
         fallbackMessage: 'Desculpe, não entendi. Pode reformular?',
@@ -108,6 +140,9 @@ export class SeedService implements OnApplicationBootstrap {
       description: 'Full e-commerce support bot with analytics data for testing',
       language: 'pt',
       createdBy: user._id,
+      organizationId: org._id,
+      clientId: randomBytes(16).toString('hex'),
+      clientSecret: randomBytes(32).toString('hex'),
       settings: {
         confidenceThreshold: 0.55,
         fallbackMessage: 'Desculpe, não entendi. Pode reformular?',

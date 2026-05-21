@@ -15,6 +15,7 @@ import {
   ConversationSessionDocument,
 } from '../runtime/schemas/conversation-session.schema';
 import { Flow, FlowDocument } from '../flows/schemas/flow.schema';
+import { OrganizationsService } from '../organizations/organizations.service';
 
 @Injectable()
 export class BotsService {
@@ -23,34 +24,52 @@ export class BotsService {
     @InjectModel(ConversationSession.name)
     private sessionModel: Model<ConversationSessionDocument>,
     @InjectModel(Flow.name) private flowModel: Model<FlowDocument>,
+    private orgsService: OrganizationsService,
   ) {}
 
-  findAll(userId: string) {
+  async findAll(userId: string, organizationId?: string) {
+    if (organizationId) {
+      const accessibleIds = await this.orgsService.getAccessibleBotIds(
+        userId,
+        organizationId,
+      );
+      const filter: any = { organizationId: new Types.ObjectId(organizationId) };
+      if (accessibleIds !== null) {
+        if (accessibleIds.length === 0) return [];
+        filter._id = { $in: accessibleIds.map((id) => new Types.ObjectId(id)) };
+      }
+      return this.botModel.find(filter).sort({ createdAt: -1 }).exec();
+    }
     return this.botModel
       .find({ createdBy: new Types.ObjectId(userId) })
       .sort({ createdAt: -1 })
       .exec();
   }
 
-  async findOne(id: string, userId: string) {
+  async findOne(id: string, userId: string, organizationId?: string) {
     const bot = await this.botModel.findById(id).exec();
     if (!bot) throw new NotFoundException('Bot not found');
-    this.assertOwnership(bot, userId);
+    await this.assertBotAccess(bot, userId, organizationId);
     return this.ensureCredentials(bot);
   }
 
-  async create(dto: CreateBotDto, userId: string) {
+  async create(dto: CreateBotDto, userId: string, organizationId?: string) {
+    if (organizationId) {
+      const isAdmin = await this.orgsService.isAdminOrOwner(userId, organizationId);
+      if (!isAdmin) throw new ForbiddenException('Only admins and owners can create bots');
+    }
     return this.botModel.create({
       ...dto,
       language: dto.language ?? 'pt',
       createdBy: new Types.ObjectId(userId),
+      organizationId: organizationId ? new Types.ObjectId(organizationId) : undefined,
       clientId: randomUUID(),
       clientSecret: randomBytes(32).toString('hex'),
     });
   }
 
-  async regenerateSecret(id: string, userId: string) {
-    const bot = await this.findOne(id, userId);
+  async regenerateSecret(id: string, userId: string, organizationId?: string) {
+    const bot = await this.findOne(id, userId, organizationId);
     bot.clientSecret = randomBytes(32).toString('hex');
     return bot.save();
   }
@@ -73,33 +92,63 @@ export class BotsService {
     return bot;
   }
 
-  async setMainFlow(id: string, flowId: string | null, userId: string) {
-    const bot = await this.findOne(id, userId);
+  async setMainFlow(id: string, flowId: string | null, userId: string, organizationId?: string) {
+    const bot = await this.findOne(id, userId, organizationId);
     bot.mainFlowId = flowId ? new Types.ObjectId(flowId) : undefined;
     return bot.save();
   }
 
-  async update(id: string, dto: UpdateBotDto, userId: string) {
-    const bot = await this.findOne(id, userId);
+  async update(id: string, dto: UpdateBotDto, userId: string, organizationId?: string) {
+    const bot = await this.findOne(id, userId, organizationId);
     Object.assign(bot, dto);
     return bot.save();
   }
 
-  async remove(id: string, userId: string) {
-    const bot = await this.findOne(id, userId);
+  async remove(id: string, userId: string, organizationId?: string) {
+    const bot = await this.findOne(id, userId, organizationId);
     await bot.deleteOne();
     return { deleted: true };
   }
 
-  private assertOwnership(bot: BotDocument, userId: string) {
+  private async assertBotAccess(
+    bot: BotDocument,
+    userId: string,
+    organizationId?: string,
+  ) {
+    if (organizationId && bot.organizationId) {
+      if (bot.organizationId.toString() !== organizationId) {
+        throw new ForbiddenException('Access denied');
+      }
+      const canAccess = await this.orgsService.canAccessBot(
+        userId,
+        organizationId,
+        (bot._id as Types.ObjectId).toString(),
+      );
+      if (!canAccess) throw new ForbiddenException('You do not have access to this bot');
+      return;
+    }
+    // Legacy fallback: direct ownership check
     if (bot.createdBy.toString() !== userId) {
       throw new ForbiddenException('Access denied');
     }
   }
 
-  async getUsageOverview(userId: string) {
-    const userOid = new Types.ObjectId(userId);
-    const bots = await this.botModel.find({ createdBy: userOid }).exec();
+  async getUsageOverview(userId: string, organizationId?: string) {
+    let bots: BotDocument[];
+    if (organizationId) {
+      const accessibleIds = await this.orgsService.getAccessibleBotIds(userId, organizationId);
+      const filter: any = { organizationId: new Types.ObjectId(organizationId) };
+      if (accessibleIds !== null) {
+        if (accessibleIds.length === 0) {
+          return { totalSessions: 0, totalMessages: 0, uniqueUsers: 0, chart: [], bots: [] };
+        }
+        filter._id = { $in: accessibleIds.map((id) => new Types.ObjectId(id)) };
+      }
+      bots = await this.botModel.find(filter).exec();
+    } else {
+      const userOid = new Types.ObjectId(userId);
+      bots = await this.botModel.find({ createdBy: userOid }).exec();
+    }
     if (bots.length === 0) {
       return { totalSessions: 0, totalMessages: 0, uniqueUsers: 0, chart: [], bots: [] };
     }
@@ -162,8 +211,8 @@ export class BotsService {
     };
   }
 
-  async getUsage(botId: string, userId: string) {
-    await this.findOne(botId, userId); // ownership check
+  async getUsage(botId: string, userId: string, organizationId?: string) {
+    await this.findOne(botId, userId, organizationId); // access check
     const botOid = new Types.ObjectId(botId);
     const now = new Date();
 
@@ -239,8 +288,8 @@ export class BotsService {
     };
   }
 
-  async getDetailedUsage(botId: string, userId: string) {
-    await this.findOne(botId, userId); // ownership check
+  async getDetailedUsage(botId: string, userId: string, organizationId?: string) {
+    await this.findOne(botId, userId, organizationId); // access check
 
     const botOid = new Types.ObjectId(botId);
     const now = new Date();
@@ -457,8 +506,8 @@ export class BotsService {
     };
   }
 
-  async getPathAnalysis(botId: string, userId: string) {
-    await this.findOne(botId, userId); // ownership check
+  async getPathAnalysis(botId: string, userId: string, organizationId?: string) {
+    await this.findOne(botId, userId, organizationId); // access check
     const botOid = new Types.ObjectId(botId);
 
     const sessions = await this.sessionModel
@@ -552,8 +601,8 @@ export class BotsService {
     return { nodes: topNodes, edges, totalSessions: sessions.length };
   }
 
-  async getSessions(botId: string, userId: string) {
-    await this.findOne(botId, userId); // ownership check
+  async getSessions(botId: string, userId: string, organizationId?: string) {
+    await this.findOne(botId, userId, organizationId); // access check
     return this.sessionModel
       .find({ botId: new Types.ObjectId(botId), isSimulator: false })
       .select('_id userId status createdAt lastActivityAt history triggeredIntents')
@@ -563,8 +612,8 @@ export class BotsService {
       .exec();
   }
 
-  async getSession(botId: string, sessionId: string, userId: string) {
-    await this.findOne(botId, userId); // ownership check
+  async getSession(botId: string, sessionId: string, userId: string, organizationId?: string) {
+    await this.findOne(botId, userId, organizationId); // access check
     const session = await this.sessionModel
       .findOne({
         _id: new Types.ObjectId(sessionId),

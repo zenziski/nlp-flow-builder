@@ -28,6 +28,7 @@ import { VariableNodeExecutor } from '../../engine/executors/variable.executor';
 import { RedirectNodeExecutor } from '../../engine/executors/redirect.executor';
 import { RandomNodeExecutor } from '../../engine/executors/random.executor';
 import { SubflowNodeExecutor } from '../../engine/executors/subflow.executor';
+import { OrganizationsModule } from '../organizations/organizations.module';
 
 function createRegistryProvider() {
   return {
@@ -62,6 +63,7 @@ function createRegistryProvider() {
     ]),
     NlpModule,
     VaultModule,
+    OrganizationsModule,
   ],
   providers: [
     RuntimeService,

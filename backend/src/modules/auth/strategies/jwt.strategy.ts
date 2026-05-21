@@ -10,6 +10,7 @@ export interface JwtPayload {
   sub: string;
   email: string;
   role: string;
+  organizationId?: string;
 }
 
 @Injectable()
@@ -28,6 +29,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload) {
     const user = await this.userModel.findById(payload.sub).exec();
     if (!user) return null;
-    return { _id: user._id, email: user.email, name: user.name, role: user.role };
+    return {
+      _id: user._id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      organizationId: user.organizationId?.toString(),
+    };
   }
 }

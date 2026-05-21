@@ -49,6 +49,10 @@ export class Bot {
   /** Default flow used by the Runtime API when no flowId is provided */
   @Prop({ type: Types.ObjectId, ref: 'Flow' })
   mainFlowId?: Types.ObjectId;
+
+  /** Organization this bot belongs to */
+  @Prop({ type: Types.ObjectId, ref: 'Organization', index: true })
+  organizationId?: Types.ObjectId;
 }
 
 export const BotSchema = SchemaFactory.createForClass(Bot);
