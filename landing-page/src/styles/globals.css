@@ -1,0 +1,214 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #fff7f2;
+  --surface: #ffffff;
+  --surface-2: #fff0e4;
+  --text: #2a2127;
+  --muted: #75636f;
+  --line: #ebd6cc;
+  --brand: #ef6c3e;
+  --brand-strong: #d35a2f;
+  --accent: #0f766e;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased;
+    margin: 0;
+    min-height: 100vh;
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    background-color: var(--bg);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Sora', sans-serif;
+    letter-spacing: -0.015em;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  /* Responsive visibility helpers (compiled directly to avoid JIT miss) */
+  .desktop-only { display: none; }
+  .mobile-only  { display: block; }
+
+  @media (min-width: 1024px) {
+    .desktop-only { display: block; }
+    .mobile-only  { display: none; }
+  }
+
+  .surface-card {
+    @apply rounded-card border;
+    border-color: var(--line);
+    background: rgba(255, 248, 242, 0.96);
+    box-shadow: 0 22px 44px -32px rgba(101, 60, 32, 0.75);
+  }
+
+  .surface-panel {
+    @apply rounded-card border backdrop-blur-sm;
+    border-color: var(--line);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 30px 60px -48px rgba(89, 45, 22, 0.85);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-brand bg-brand
+           px-6 py-3 text-sm font-semibold text-white transition-all duration-200
+           hover:bg-brand-strong hover:border-brand-strong shadow-brand
+           focus:outline-none focus:ring-2 focus:ring-brand/35 active:translate-y-[1px];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-line bg-white/80
+           px-6 py-3 text-sm font-semibold text-app-text transition-all duration-200
+           hover:bg-white hover:border-[#d0baad]
+           focus:outline-none focus:ring-2 focus:ring-brand/25 active:translate-y-[1px];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl
+           px-5 py-2.5 text-sm font-semibold text-muted transition-all duration-200
+           hover:bg-surface-2 hover:text-app-text
+           focus:outline-none;
+  }
+
+  .section-label {
+    @apply text-xs font-bold uppercase tracking-[0.18em];
+    color: var(--brand);
+  }
+
+  .section-title {
+    @apply text-3xl font-bold md:text-4xl;
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    letter-spacing: -0.015em;
+  }
+
+  .section-subtitle {
+    @apply text-base leading-relaxed;
+    color: var(--muted);
+  }
+}
+
+/* ── Navbar CTA shimmer button ─────────────────────────── */
+.nav-cta-btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef6c3e 0%, #d35a2f 100%);
+  box-shadow: 0 4px 14px rgba(239,108,62,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.nav-cta-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
+  animation: navShimmer 2.8s ease-in-out infinite;
+}
+.nav-cta-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 6px 22px rgba(239,108,62,0.55), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.nav-cta-btn:active {
+  transform: scale(0.98);
+}
+@keyframes navShimmer {
+  0%        { left: -100%; }
+  55%, 100% { left: 150%; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #ffe6d8;
+}
+::-webkit-scrollbar-thumb {
+  background: #d8a78f;
+  border-radius: 99px;
+}
+
+/* ── Blob animations ───────────────────────────────────── */
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+@keyframes blob1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%       { transform: translate(40px, -70px) scale(1.06); }
+  50%       { transform: translate(90px, 30px) scale(0.96); }
+  75%       { transform: translate(-30px, 60px) scale(1.04); }
+}
+@keyframes blob2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  30%       { transform: translate(-60px, 50px) scale(1.05); }
+  60%       { transform: translate(40px, -70px) scale(0.93); }
+  80%       { transform: translate(-20px, 30px) scale(1.02); }
+}
+@keyframes blob3 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33%       { transform: translate(35px, -50px) scale(1.09) rotate(6deg); }
+  66%       { transform: translate(-45px, 35px) scale(0.91) rotate(-4deg); }
+}
+@keyframes scrollCaret {
+  0%        { opacity: 0; transform: translateY(-8px); }
+  50%       { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(8px); }
+}
+
+/* ── Scroll reveal ─────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Noise texture overlay */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px;
+}
